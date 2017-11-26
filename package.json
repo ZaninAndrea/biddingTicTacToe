@@ -1,0 +1,18 @@
+{
+    "name": "bidding-tic-tac-toe-server",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "nodemon ./index.js --ignore test*.js",
+        "test": "node test.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "nodemon": "^1.12.1",
+        "socket.io": "^2.0.4",
+        "socket.io-client": "^2.0.4",
+        "ws": "^3.3.2"
+    }
+}
