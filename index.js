@@ -1,4 +1,4 @@
-var io = require("socket.io")(80)
+var io = require("socket.io")(PORT)
 let games = {}
 
 function checkVictory(board, player) {
