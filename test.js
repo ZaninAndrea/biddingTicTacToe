@@ -12,7 +12,7 @@ player.on("player found", name => {
     player.emit("bid", 10)
 })
 
-player.on("bid received", bid => {
+player.on("bids received", bid => {
     console.log(bid)
 })
 player.on("check received", console.log)

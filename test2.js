@@ -11,7 +11,7 @@ player.on("joined game", name => {
     player.emit("bid", 20)
 })
 
-player.on("bid received", bid => {
+player.on("bids received", bid => {
     console.log(bid)
     player.emit("check", 1, 1)
 })
