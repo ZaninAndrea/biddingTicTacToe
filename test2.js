@@ -1,6 +1,6 @@
 const io = require("socket.io-client")
 
-var player = io.connect("ws://localhost/")
+var player = io.connect("wss://biddingtictactoe.herokuapp.com/")
 
 player.on("connect", function() {
     player.emit("join game", process.argv[process.argv.length - 1], "Andrea")

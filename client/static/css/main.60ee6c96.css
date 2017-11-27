@@ -1,0 +1,2 @@
+body{margin:0;padding:0;font-family:sans-serif}.board{display:grid;grid-template-columns:10vh 10vh 10vh;grid-template-rows:10vh 10vh 10vh;grid-column-gap:1vh;grid-row-gap:1vh}.cell{width:10vh;height:10vh;background-color:red;border-radius:2vh;display:inline-block;text-align:center;line-height:10vh}
+/*# sourceMappingURL=main.60ee6c96.css.map*/
