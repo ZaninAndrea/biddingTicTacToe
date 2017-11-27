@@ -6,6 +6,7 @@ const PORT = process.env.PORT || 3000
 const INDEX = path.join(__dirname, "client", "index.html")
 
 const server = express()
+    .use(require("cors"))
     .use((req, res) => res.sendFile(INDEX))
     .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
