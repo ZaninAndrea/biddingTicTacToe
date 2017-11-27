@@ -1,4 +1,15 @@
-var io = require("socket.io")(PORT)
+"use strict"
+const express = require("express")
+const socketIO = require("socket.io")
+
+const PORT = process.env.PORT || 3000
+
+const server = express()
+    .use((req, res) => res.sendFile(INDEX))
+    .listen(PORT, () => console.log(`Listening on ${PORT}`))
+
+const io = socketIO(server)
+
 let games = {}
 
 function checkVictory(board, player) {
