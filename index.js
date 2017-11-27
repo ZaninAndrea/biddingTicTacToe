@@ -1,6 +1,7 @@
 "use strict"
 const express = require("express")
 const socketIO = require("socket.io")
+const path = require("path")
 
 const PORT = process.env.PORT || 3000
 const INDEX = path.join(__dirname, "client", "index.html")
