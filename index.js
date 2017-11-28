@@ -114,7 +114,9 @@ io.on("connection", function(socket) {
             return
         }
         games[socket.game]["bid" + socket.player] = intBid
-        if (games[socket.game][socket.player === "O" ? "bidX" : "bidO"]) {
+        if (
+            games[socket.game][socket.player === "O" ? "bidX" : "bidO"] !== null
+        ) {
             // if other player has bidded too
             console.log("bids received")
             const bidO = games[socket.game].bidO,
