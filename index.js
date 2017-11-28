@@ -43,12 +43,12 @@ function checkVictory(board, player) {
 function checkDraw(board) {
     for (let i in winningPositions) {
         const containsX =
-            winning[i]
+            winningPositions[i]
                 .map(cell => playerWhoChecked(board, cell))
                 .indexOf("X") !== -1
 
         const containsO =
-            winning[i]
+            winningPositions[i]
                 .map(cell => playerWhoChecked(board, cell))
                 .indexOf("O") !== -1
 
