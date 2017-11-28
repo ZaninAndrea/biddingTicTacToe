@@ -179,7 +179,7 @@ io.on("connection", function(socket) {
                     io.in(socket.game).emit("game ended", "X")
                 } else if (checkVictory(games[socket.game].board, "O")) {
                     io.in(socket.game).emit("game ended", "O")
-                } else if (checkDraw(board)) {
+                } else if (checkDraw(games[socket.game].board)) {
                     io.in(socket.game).emit("game ended", "boardDraw")
                 } else {
                     games[socket.game].gameState = "bidding"
