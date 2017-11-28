@@ -26,11 +26,10 @@ const winningPositions = [
     [[0, 0], [1, 1], [2, 2]],
     [[0, 2], [1, 1], [2, 0]],
 ]
+function playerWhoChecked(board, position) {
+    return board[position[0]][position[1]]
+}
 function checkVictory(board, player) {
-    function playerWhoChecked(board, position) {
-        return board[position[0]][position[1]]
-    }
-
     for (let i in winningPositions) {
         if (
             playerWhoChecked(board, winningPositions[i][0]) === player &&
@@ -40,6 +39,23 @@ function checkVictory(board, player) {
             return true
     }
     return false
+}
+function checkDraw(board) {
+    for (let i in winningPositions) {
+        const containsX =
+            winning[i]
+                .map(cell => playerWhoChecked(board, cell))
+                .indexOf("X") !== -1
+
+        const containsO =
+            winning[i]
+                .map(cell => playerWhoChecked(board, cell))
+                .indexOf("O") !== -1
+
+        if (!containsX || !containsO) return false // there still is one possible tris
+    }
+
+    return true
 }
 
 io.on("connection", function(socket) {
@@ -163,6 +179,8 @@ io.on("connection", function(socket) {
                     io.in(socket.game).emit("game ended", "X")
                 } else if (checkVictory(games[socket.game].board, "O")) {
                     io.in(socket.game).emit("game ended", "O")
+                } else if (checkDraw(board)) {
+                    io.in(socket.game).emit("game ended", "boardDraw")
                 } else {
                     games[socket.game].gameState = "bidding"
                 }
