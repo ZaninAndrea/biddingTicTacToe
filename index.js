@@ -16,60 +16,30 @@ io.set("origins", "*:*")
 
 let games = {}
 
+const winningPositions = [
+    [[0, 0], [0, 1], [0, 2]],
+    [[1, 0], [1, 1], [1, 2]],
+    [[2, 0], [2, 1], [2, 2]],
+    [[0, 0], [1, 0], [2, 0]],
+    [[0, 1], [1, 1], [2, 1]],
+    [[0, 2], [1, 2], [2, 2]],
+    [[0, 0], [1, 1], [2, 2]],
+    [[0, 2], [1, 1], [2, 0]],
+]
 function checkVictory(board, player) {
-    // rows
-    if (
-        board[0][0] === player &&
-        board[0][1] === player &&
-        board[0][2] === player
-    )
-        return true
-    if (
-        board[1][0] === player &&
-        board[1][1] === player &&
-        board[1][2] === player
-    )
-        return true
-    if (
-        board[2][0] === player &&
-        board[2][1] === player &&
-        board[2][2] === player
-    )
-        return true
+    function playerWhoChecked(board, position) {
+        return board[position[0]][position[1]]
+    }
 
-    // columns
-    if (
-        board[0][0] === player &&
-        board[1][0] === player &&
-        board[2][0] === player
-    )
-        return true
-    if (
-        board[0][1] === player &&
-        board[1][1] === player &&
-        board[2][1] === player
-    )
-        return true
-    if (
-        board[0][2] === player &&
-        board[1][2] === player &&
-        board[2][2] === player
-    )
-        return true
-
-    // diagonals
-    if (
-        board[0][0] === player &&
-        board[1][1] === player &&
-        board[2][2] === player
-    )
-        return true
-    if (
-        board[0][2] == player &&
-        board[1][1] === player &&
-        board[2][0] === player
-    )
-        return true
+    for (let i in winningPositions) {
+        if (
+            playerWhoChecked(board, winningPositions[i][0]) === player &&
+            playerWhoChecked(board, winningPositions[i][1]) === player &&
+            playerWhoChecked(board, winningPositions[i][2]) === player
+        )
+            return true
+    }
+    return false
 }
 
 io.on("connection", function(socket) {
@@ -86,6 +56,7 @@ io.on("connection", function(socket) {
             playerO: {name, fiches: 100},
             board: [["", "", ""], ["", "", ""], ["", "", ""]],
             gameState: "bidding",
+            evenBidStreak: 0,
         }
         socket.game = gameRoom
         socket.player = "O"
@@ -164,9 +135,14 @@ io.on("connection", function(socket) {
                 games[socket.game]["bidO"] = null
                 games[socket.game].gameState = "checking"
             } else {
-                io.in(socket.game).emit("bids even")
                 games[socket.game]["bidX"] = null
                 games[socket.game]["bidO"] = null
+                games[socket.game].evenBidStreak += 1
+                if (evenBidStreak > 4) {
+                    io.in(socket.game).emit("game ended", "bidDraw")
+                } else {
+                    io.in(socket.game).emit("bids even")
+                }
             }
         }
     })
