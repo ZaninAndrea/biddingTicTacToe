@@ -14,7 +14,7 @@ const server = express()
 const io = socketIO(server)
 io.set("origins", "*:*")
 
-let games = {}
+let matches = {}
 
 const winningPositions = [
     [[0, 0], [0, 1], [0, 2]],
@@ -63,39 +63,40 @@ io.on("connection", function(socket) {
         console.log("user disconnected")
     })
 
-    socket.on("new game", function(name) {
-        let gameRoom = Math.floor(Math.random() * 1000).toString()
-        while (games.hasOwnProperty(gameRoom)) {
-            gameRoom = Math.floor(Math.random() * 1000).toString()
+    socket.on("new match", function(name, gamesLeft) {
+        let matchRoom = Math.floor(Math.random() * 1000).toString()
+        while (matches.hasOwnProperty(matchRoom)) {
+            matchRoom = Math.floor(Math.random() * 1000).toString()
         }
-        games[gameRoom] = {
+        matches[matchRoom] = {
             playerO: {name, fiches: 100},
             board: [["", "", ""], ["", "", ""], ["", "", ""]],
             gameState: "bidding",
             evenBidStreak: 0,
+            gamesLeft: gamesLeft,
         }
-        socket.game = gameRoom
+        socket.match = matchRoom
         socket.player = "O"
 
-        socket.join(gameRoom)
-        socket.emit("created game", gameRoom)
+        socket.join(matchRoom)
+        socket.emit("created match", matchRoom)
     })
-    socket.on("join game", function(gameRoom, name) {
-        if (games.hasOwnProperty(gameRoom)) {
-            games[gameRoom].playerX = {name, fiches: 100}
-            socket.join(gameRoom)
-            socket.game = gameRoom
+    socket.on("join match", function(matchRoom, name) {
+        if (matches.hasOwnProperty(matchRoom)) {
+            matches[matchRoom].playerX = {name, fiches: 100}
+            socket.join(matchRoom)
+            socket.match = matchRoom
             socket.player = "X"
 
-            socket.emit("joined game", games[gameRoom].playerO.name)
-            socket.to(gameRoom).emit("player found", name)
+            socket.emit("joined match", matches[matchRoom].playerO.name)
+            socket.to(matchRoom).emit("player found", name)
         } else {
-            socket.emit("join game error", "game does not exist")
+            socket.emit("join match error", "match does not exist")
         }
     })
 
     socket.on("bid", function(bid) {
-        if (games[socket.game].gameState !== "bidding") {
+        if (matches[socket.match].gameState !== "bidding") {
             console.log("not time to bid")
             socket.emit("bid error", "it's not time to bid")
             return
@@ -109,60 +110,60 @@ io.on("connection", function(socket) {
             return
         }
 
-        if (games[socket.game][`player${socket.player}`].fiches < intBid) {
+        if (matches[socket.match][`player${socket.player}`].fiches < intBid) {
             socket.emit("bid error", "you don't have that kind of money")
             return
         }
-        games[socket.game]["bid" + socket.player] = intBid
+        matches[socket.match]["bid" + socket.player] = intBid
         if (
-            games[socket.game][socket.player === "O" ? "bidX" : "bidO"] !==
+            matches[socket.match][socket.player === "O" ? "bidX" : "bidO"] !==
                 null &&
-            games[socket.game][socket.player === "O" ? "bidX" : "bidO"] !==
+            matches[socket.match][socket.player === "O" ? "bidX" : "bidO"] !==
                 undefined
         ) {
             // if other player has bidded too
             console.log("bids received")
-            const bidO = games[socket.game].bidO,
-                bidX = games[socket.game].bidX
+            const bidO = matches[socket.match].bidO,
+                bidX = matches[socket.match].bidX
 
             if (bidO > bidX) {
-                games[socket.game].playerO.fiches -= bidO
-                games[socket.game].playerX.fiches += bidO
-                games[socket.game].playing = "O"
+                matches[socket.match].playerO.fiches -= bidO
+                matches[socket.match].playerX.fiches += bidO
+                matches[socket.match].playing = "O"
 
-                io.in(socket.game).emit("bids received", {
+                io.in(socket.match).emit("bids received", {
                     playing: "O",
                     bidO,
                     bidX,
-                    newXFiches: games[socket.game].playerX.fiches,
-                    newOFiches: games[socket.game].playerO.fiches,
+                    newXFiches: matches[socket.match].playerX.fiches,
+                    newOFiches: matches[socket.match].playerO.fiches,
                 })
-                games[socket.game]["bidX"] = null
-                games[socket.game]["bidO"] = null
-                games[socket.game].gameState = "checking"
+                matches[socket.match]["bidX"] = null
+                matches[socket.match]["bidO"] = null
+                matches[socket.match].gameState = "checking"
             } else if (bidX > bidO) {
-                games[socket.game].playerX.fiches -= bidX
-                games[socket.game].playerO.fiches += bidX
-                games[socket.game].playing = "X"
+                matches[socket.match].playerX.fiches -= bidX
+                matches[socket.match].playerO.fiches += bidX
+                matches[socket.match].playing = "X"
 
-                io.in(socket.game).emit("bids received", {
+                io.in(socket.match).emit("bids received", {
                     playing: "X",
                     bidO,
                     bidX,
-                    newXFiches: games[socket.game].playerX.fiches,
-                    newOFiches: games[socket.game].playerO.fiches,
+                    newXFiches: matches[socket.match].playerX.fiches,
+                    newOFiches: matches[socket.match].playerO.fiches,
                 })
-                games[socket.game]["bidX"] = null
-                games[socket.game]["bidO"] = null
-                games[socket.game].gameState = "checking"
+                matches[socket.match]["bidX"] = null
+                matches[socket.match]["bidO"] = null
+                matches[socket.match].gameState = "checking"
             } else {
-                games[socket.game]["bidX"] = null
-                games[socket.game]["bidO"] = null
-                games[socket.game].evenBidStreak += 1
-                if (games[socket.game].evenBidStreak > 4) {
-                    io.in(socket.game).emit("game ended", "bidDraw")
+                matches[socket.match]["bidX"] = null
+                matches[socket.match]["bidO"] = null
+                matches[socket.match].evenBidStreak += 1
+                if (matches[socket.match].evenBidStreak > 4) {
+                    io.in(socket.match).emit("game ended", "bidDraw")
                 } else {
-                    io.in(socket.game).emit("bids even")
+                    io.in(socket.match).emit("bids even")
                 }
             }
         }
@@ -170,24 +171,24 @@ io.on("connection", function(socket) {
 
     socket.on("check", function(row, col) {
         if (
-            games[socket.game].playing === socket.player &&
-            games[socket.game].gameState === "checking"
+            matches[socket.match].playing === socket.player &&
+            matches[socket.match].gameState === "checking"
         ) {
-            if (!games[socket.game].board[row][col]) {
-                games[socket.game].playing = null
-                games[socket.game].board[row][col] = socket.player
+            if (!matches[socket.match].board[row][col]) {
+                matches[socket.match].playing = null
+                matches[socket.match].board[row][col] = socket.player
                 io
-                    .in(socket.game)
+                    .in(socket.match)
                     .emit("check received", row, col, socket.player)
 
-                if (checkVictory(games[socket.game].board, "X")) {
-                    io.in(socket.game).emit("game ended", "X")
-                } else if (checkVictory(games[socket.game].board, "O")) {
-                    io.in(socket.game).emit("game ended", "O")
-                } else if (checkDraw(games[socket.game].board)) {
-                    io.in(socket.game).emit("game ended", "boardDraw")
+                if (checkVictory(matches[socket.match].board, "X")) {
+                    io.in(socket.match).emit("game ended", "X")
+                } else if (checkVictory(matches[socket.match].board, "O")) {
+                    io.in(socket.match).emit("game ended", "O")
+                } else if (checkDraw(matches[socket.match].board)) {
+                    io.in(socket.match).emit("game ended", "boardDraw")
                 } else {
-                    games[socket.game].gameState = "bidding"
+                    matches[socket.match].gameState = "bidding"
                 }
             } else {
                 socket.emit("check error", "position already checked")

@@ -3,10 +3,10 @@ const io = require("socket.io-client")
 var player = io.connect("wss://biddingtictactoe.herokuapp.com/")
 
 player.on("connect", function() {
-    player.emit("join game", process.argv[process.argv.length - 1], "Andrea")
+    player.emit("join match", process.argv[process.argv.length - 1], "Andrea")
 })
 
-player.on("joined game", name => {
+player.on("joined match", name => {
     console.log(name)
     player.emit("bid", 20)
 })

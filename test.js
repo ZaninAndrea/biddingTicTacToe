@@ -4,10 +4,10 @@ var player = io.connect("wss://biddingtictactoe.herokuapp.com/")
 
 player.on("connect", function() {
     console.log("connected")
-    player.emit("new game", "Giorgio")
+    player.emit("new match", "Giorgio")
 })
 
-player.on("created game", console.log)
+player.on("created match", console.log)
 player.on("player found", name => {
     console.log(name)
     player.emit("bid", 10)
