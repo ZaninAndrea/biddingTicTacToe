@@ -154,7 +154,7 @@ io.on("connection", function(socket) {
                 games[socket.game]["bidX"] = null
                 games[socket.game]["bidO"] = null
                 games[socket.game].evenBidStreak += 1
-                if (evenBidStreak > 4) {
+                if (games[socket.game].evenBidStreak > 4) {
                     io.in(socket.game).emit("game ended", "bidDraw")
                 } else {
                     io.in(socket.game).emit("bids even")
